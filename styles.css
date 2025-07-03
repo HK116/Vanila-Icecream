@@ -1,0 +1,21 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #B3E5FC;
+}
+
+#stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.cone {
+    position: absolute;
+    will-change: transform, filter;
+    pointer-events: none;
+    width: 64px;
+    height: auto;
+}
