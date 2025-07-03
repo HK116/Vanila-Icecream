@@ -1,6 +1,7 @@
 const stage = document.getElementById('stage');
-const coneCount = 150;
 const cones = [];
+const maxCones = 200;
+let totalSpawned = 0;
 
 function rand(min, max) {
   return Math.random() * (max - min) + min;
@@ -8,14 +9,13 @@ function rand(min, max) {
 
 function spawnCone() {
   const img = document.createElement('img');
-  img.src = 'vanilla.png'; // Ensure this image is in the same folder
+  img.src = 'vanilla.png'; 
   img.className = 'cone';
   stage.appendChild(img);
 
   const depth = rand(0.5, 1.5); // For depth illusion
-
-  // Randomly choose whether to spawn from top or left
   const fromTop = Math.random() < 0.5;
+
   const x = fromTop ? rand(0, window.innerWidth) : -100;
   const y = fromTop ? -100 : rand(0, window.innerHeight);
 
@@ -23,34 +23,64 @@ function spawnCone() {
     el: img,
     x,
     y,
-    speed: rand(1, 2) * depth,
-    drift: rand(1, 2) * depth, // Horizontal drift for diagonal movement
     scale: depth,
+    speed: rand(0.5, 1.5) * depth,
+    drift: rand(0.5, 1.5) * depth,
+    swayPhase: rand(0, Math.PI * 2),
+    swayAmplitude: rand(10, 30), // stronger wind at deeper depths
+    rotation: rand(0, 360),
+    rotationSpeed: rand(-1, 1),
     blur: (1.5 - depth) * 2
   };
 }
 
-// Create cones
-for (let i = 0; i < coneCount; i++) {
-  cones.push(spawnCone());
+function spawnBatch(n) {
+    for (let i = 0; i < n; i++) {
+        if (totalSpawned >= maxCones) return;
+        cones.push(spawnCone());
+        totalSpawned++;
+    }
 }
 
-function animate() {
+// Initla cones
+spawnBatch(50);
+
+// Stream more cones gradually
+const spawnInterval = setInterval(() => {
+    if (totalSpawned >= maxCones) {
+        clearInterval(spawnInterval);
+    } else {
+        spawnBatch(10);
+    }
+}, 500);
+
+
+// Animation loop
+function animate(time) {
   cones.forEach(c => {
+    // Update movement
     c.x += c.drift;
     c.y += c.speed;
 
-    // Reset when off-screen
+    // Wind sway using sine wave
+    const sway = Math.sin(time * 0.002 + c.swayPhase) * c.swayAmplitude;
+    const finalX = c.x + sway;
+
+    // Rotation
+    c.rotation += c.rotationSpeed;
+
+    // Reset cone if off screen
     if (c.y > window.innerHeight + 100 || c.x > window.innerWidth + 100) {
       const newCone = spawnCone();
-      Object.assign(c, newCone); // Replace properties, reuse DOM element
+      Object.assign(c, newCone);
     }
 
-    c.el.style.transform = `translate(${c.x}px, ${c.y}px) scale(${c.scale})`;
+    // Apply CSS transform
+    c.el.style.transform = `translate(${finalX}px, ${c.y}px) scale(${c.scale}) rotate(${c.rotation}deg)`;
     c.el.style.filter = `blur(${c.blur}px)`;
   });
 
   requestAnimationFrame(animate);
 }
 
-animate();
+requestAnimationFrame(animate);
