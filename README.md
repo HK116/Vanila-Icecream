@@ -23,15 +23,14 @@ A visually rich, interactive vanilla ice cream cone rain animation inspired by [
 2. Make sure you have the following structure:
 
     /assets
-      ├── vanilla.png
-      ├── chocolate.png
-      ├── mint.png
-      └── rainbow.png
+        ├── vanilla.png
+        ├── chocolate.png
+        ├── mint.png
+        └── rainbow.png
     index.html
     script.js
     style.css
     README.md
-
 
 3. Open `index.html` in any modern browser.
 
